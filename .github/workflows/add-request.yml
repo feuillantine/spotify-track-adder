@@ -1,0 +1,94 @@
+name: Add Request
+
+on:
+  issues:
+    types: [labeled]
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    if: >-
+      github.event.label.name == 'add-request' &&
+      github.event.sender.login == github.repository_owner
+    defaults:
+      run:
+        shell: bash -euo pipefail {0}
+    env:
+      ISSUE_NUMBER: ${{ github.event.issue.number }}
+      ISSUE_USER: ${{ github.event.issue.user.login }}
+      ISSUE_BODY: ${{ github.event.issue.body }}
+    steps:
+      # リポジトリをチェックアウト
+      - name: Checkout repository
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+
+      # pnpmをセットアップ
+      - name: Setup pnpm
+        uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061 # v4.2.0
+        with:
+          version: 10
+
+      # Node.jsをセットアップ
+      - name: Setup Node.js
+        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
+        with:
+          node-version: "22"
+          cache: "pnpm"
+
+      # 依存パッケージをインストール
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Issue本文からURL一覧を抽出してtracks.txtとして保存
+      - name: Extract URLs from issue body
+        id: extract-urls
+        run: |
+          ISSUE_BODY_FILE="issue_body.txt"
+          printf '%s' "$ISSUE_BODY" > "$ISSUE_BODY_FILE"
+
+          # Issue本文からURL一覧を抽出してtracks.txtに保存
+          # 先頭のリストマーカー(-, *, 数字.)を除去し、空行を削除し、重複を除外
+          sed -E 's/\r//g' "$ISSUE_BODY_FILE" \
+            | sed -E 's/^\s*([-*]|[0-9]+\.)\s+//' \
+            | sed -E 's/^\s+//; s/\s+$//' \
+            | grep -v '^$' \
+            | awk '!seen[$0]++' \
+            > tracks.txt || true
+
+          if [ ! -s tracks.txt ]; then
+            echo "Issue本文からURLが抽出できませんでした"
+            echo "has_urls=false" >> "$GITHUB_OUTPUT"
+            exit 1
+          fi
+
+          echo "抽出されたURL:"
+          cat tracks.txt
+          echo "has_urls=true" >> "$GITHUB_OUTPUT"
+
+      # 同期スクリプトを実行
+      - name: Run
+        if: steps.extract-urls.outputs.has_urls == 'true'
+        run: pnpm start
+        env:
+          CLIENT_ID: ${{ secrets.CLIENT_ID }}
+          CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
+          REFRESH_TOKEN: ${{ secrets.REFRESH_TOKEN }}
+          PLAYLIST_ID: ${{ secrets.PLAYLIST_ID }}
+
+      # 処理完了をIssueにコメント
+      - name: Comment on issue
+        if: always()
+        run: |
+          if [ "${{ steps.extract-urls.outputs.has_urls }}" == "true" ]; then
+            BODY=$(printf '@%s\n追加処理が完了しました' "$ISSUE_USER")
+          else
+            BODY=$(printf '@%s\nURLの抽出に失敗しました' "$ISSUE_USER")
+          fi
+          gh issue comment "$ISSUE_NUMBER" --body "$BODY"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
