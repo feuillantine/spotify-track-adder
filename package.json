@@ -1,7 +1,7 @@
 {
-  "name": "spotify-playlist-sync",
+  "name": "spotify-track-adder",
   "version": "1.0.0",
-  "description": "Sync favorite tracks from one Spotify user to another user's playlist",
+  "description": "Add tracks to a playlist",
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
@@ -19,7 +19,6 @@
   "keywords": [
     "spotify",
     "playlist",
-    "sync",
     "github-actions"
   ],
   "author": "",

@@ -9,7 +9,7 @@ permissions:
   issues: write
 
 jobs:
-  sync:
+  add-tracks:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     if: >-
