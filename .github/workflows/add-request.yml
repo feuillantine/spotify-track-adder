@@ -61,6 +61,7 @@ jobs:
 
       # 同期スクリプトを実行
       - name: Run
+        id: run-script
         if: steps.extract-urls.outputs.has_urls == 'true'
         run: pnpm start
         env:
@@ -70,16 +71,24 @@ jobs:
           PLAYLIST_ID: ${{ secrets.PLAYLIST_ID }}
 
       # 処理完了をIssueにコメント
-      - name: Comment on issue
+      - name: Comment and close issue
         if: always()
         run: |
-          hasUrls="${HAS_URLS}"
-          if [ "$hasUrls" == "true" ]; then
-            BODY=$(printf '@%s\n追加処理が完了しました' "$ISSUE_USER")
-          else
+          has_urls="${env.HAS_URLS}"
+          run_status="${env.RUN_STATUS}"
+
+          if [ "$has_urls" != "true" ]; then
             BODY=$(printf '@%s\nURLの抽出に失敗しました' "$ISSUE_USER")
+            gh issue comment "$ISSUE_NUMBER" --body "$BODY"
+          elif [ "$run_status" == "failure" ]; then
+            BODY=$(printf '@%s\n追加処理中にエラーが発生しました' "$ISSUE_USER")
+            gh issue comment "$ISSUE_NUMBER" --body "$BODY"
+          else
+            BODY=$(printf '@%s\n追加処理が完了しました' "$ISSUE_USER")
+            gh issue comment "$ISSUE_NUMBER" --body "$BODY"
+            gh issue close "$ISSUE_NUMBER"
           fi
-          gh issue comment "$ISSUE_NUMBER" --body "$BODY"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           HAS_URLS: ${{ steps.extract-urls.outputs.has_urls }}
+          RUN_STATUS: ${{ steps.run-script.outcome }}
