@@ -73,7 +73,8 @@ jobs:
       - name: Comment on issue
         if: always()
         run: |
-          if [ "${{ steps.extract-urls.outputs.has_urls }}" == "true" ]; then
+          hasUrls="${HAS_URLS}"
+          if [ "$hasUrls" == "true" ]; then
             BODY=$(printf '@%s\n追加処理が完了しました' "$ISSUE_USER")
           else
             BODY=$(printf '@%s\nURLの抽出に失敗しました' "$ISSUE_USER")
@@ -81,3 +82,4 @@ jobs:
           gh issue comment "$ISSUE_NUMBER" --body "$BODY"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HAS_URLS: ${{ steps.extract-urls.outputs.has_urls }}
