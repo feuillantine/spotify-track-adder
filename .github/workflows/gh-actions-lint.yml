@@ -1,0 +1,85 @@
+name: GitHub Actions Lint
+
+on:
+  push:
+    paths:
+      - '.github/workflows/**'
+      - '.github/actions/**'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/**'
+      - '.github/actions/**'
+    types:
+      - opened
+      - reopened
+      - synchronize
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: gha-lint-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Lint GitHub Actions
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        shell: bash -euo pipefail {0}
+    env:
+      GOPATH: ${{ github.workspace }}/.go
+      ACTIONLINT_VERSION: a443f344ff32813837fa49f7aa6cbc478d770e62 # v1.7.9
+      GHALINT_VERSION: b5d32e581288a7ff4bbd77884641d36d886cfd27 # v1.5.4
+    steps:
+      - name: Checkout
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Add tool paths
+        run: |
+          echo "${GOPATH}/bin" >> "$GITHUB_PATH"
+
+      - name: Cache tools
+        id: cache-tools
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          path: |
+            ${{ env.GOPATH }}
+          key: ${{ runner.os }}-tools-${{ hashFiles('.github/workflows/gh-actions-lint.yml') }}
+          restore-keys: ${{ runner.os }}-tools-
+
+      - name: Install tools
+        if: steps.cache-tools.outputs.cache-hit != 'true'
+        run: |
+          go install github.com/rhysd/actionlint/cmd/actionlint@${{ env.ACTIONLINT_VERSION }}
+          go install github.com/suzuki-shunsuke/ghalint/cmd/ghalint@${{ env.GHALINT_VERSION }}
+          actionlint --version
+          ghalint version
+
+      - name: Run actionlint
+        run: actionlint -color
+
+      - name: Run ghalint
+        if: always()
+        run: ghalint run && ghalint act
+        env:
+          GHALINT_LOG_COLOR: always
+
+      - name: Run zizmor
+        if: always()
+        uses: zizmorcore/zizmor-action@e639db99335bc9038abc0e066dfcd72e23d26fb4 # v0.3.0
+        with:
+          # 対象をローカルファイルに限定
+          inputs: |
+            .github/actions/
+            .github/workflows/
+          online-audits: false
+          advanced-security: false

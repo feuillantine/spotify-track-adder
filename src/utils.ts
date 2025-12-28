@@ -22,14 +22,15 @@ export function convertTrackUri(url: string): string | null {
  * テキストファイルからトラックURLを読み込み、Spotify URIのリストを返却
  */
 export async function readTrackUrisFromFile(filePath: string): Promise<string[]> {
-  if (!await fs.pathExists(filePath)) {
+  if (!(await fs.pathExists(filePath))) {
     throw new Error(`File not found: ${filePath}`);
   }
 
   const content = await fs.readFile(filePath, 'utf-8');
   const lines = content.split('\n');
 
-  return lines.map((line) => convertTrackUri(line.trim()))
+  return lines
+    .map((line) => convertTrackUri(line.trim()))
     .filter((uri) => uri !== null)
     .filter((uri) => uri !== '');
 }

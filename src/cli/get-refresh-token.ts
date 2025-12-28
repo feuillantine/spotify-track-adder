@@ -1,5 +1,4 @@
 import path from 'node:path';
-import { Command } from 'commander';
 import dotenv from 'dotenv';
 import express from 'express';
 import { buildAuthorizeUrl, fetchAccessToken } from 'spotify-utility';
@@ -11,11 +10,7 @@ interface SpotifyConfig {
 }
 
 // 必要スコープ
-const requiredScopes = [
-  'user-library-read',
-  'playlist-modify-public',
-  'playlist-modify-private',
-];
+const requiredScopes = ['user-library-read', 'playlist-modify-public', 'playlist-modify-private'];
 
 // 設定管理
 function getConfig(): SpotifyConfig {
@@ -122,10 +117,6 @@ class AuthServer {
 
 // メイン処理
 function main() {
-  // 必要であればcommanderを使ってヘルプなどを表示できるようにするが、今回は引数不要
-  const program = new Command();
-  program.parse(process.argv);
-
   dotenv.config({ path: path.resolve(process.cwd(), '.env') });
   const config = getConfig();
   const server = new AuthServer();
