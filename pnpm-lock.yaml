@@ -13,7 +13,7 @@ importers:
         version: 11.3.3
       spotify-utility:
         specifier: github:feuillantine/spotify-utility
-        version: https://codeload.github.com/feuillantine/spotify-utility/tar.gz/50702660c30bb3b71f3dd69e54b9c564fd4dce17
+        version: https://codeload.github.com/feuillantine/spotify-utility/tar.gz/0176449e18aa53bce365e6e97d834a676c8be8ec
     devDependencies:
       '@biomejs/biome':
         specifier: ^1.9.4
@@ -431,8 +431,8 @@ packages:
     resolution: {integrity: sha512-ZX99e6tRweoUXqR+VBrslhda51Nh5MTQwou5tnUDgbtyM0dBgmhEDtWGP/xbKn6hqfPRHujUNwz5fy/wbbhnpw==}
     engines: {node: '>= 0.4'}
 
-  spotify-utility@https://codeload.github.com/feuillantine/spotify-utility/tar.gz/50702660c30bb3b71f3dd69e54b9c564fd4dce17:
-    resolution: {tarball: https://codeload.github.com/feuillantine/spotify-utility/tar.gz/50702660c30bb3b71f3dd69e54b9c564fd4dce17}
+  spotify-utility@https://codeload.github.com/feuillantine/spotify-utility/tar.gz/0176449e18aa53bce365e6e97d834a676c8be8ec:
+    resolution: {tarball: https://codeload.github.com/feuillantine/spotify-utility/tar.gz/0176449e18aa53bce365e6e97d834a676c8be8ec}
     version: 0.1.0
 
   statuses@2.0.2:
@@ -907,7 +907,7 @@ snapshots:
       side-channel-map: 1.0.1
       side-channel-weakmap: 1.0.2
 
-  spotify-utility@https://codeload.github.com/feuillantine/spotify-utility/tar.gz/50702660c30bb3b71f3dd69e54b9c564fd4dce17:
+  spotify-utility@https://codeload.github.com/feuillantine/spotify-utility/tar.gz/0176449e18aa53bce365e6e97d834a676c8be8ec:
     dependencies:
       '@spotify/web-api-ts-sdk': 1.2.0
 

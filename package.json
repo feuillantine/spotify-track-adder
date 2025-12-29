@@ -15,11 +15,7 @@
     "get-refresh-token": "ts-node src/cli/get-refresh-token.ts",
     "preinstall": "npx only-allow pnpm"
   },
-  "keywords": [
-    "spotify",
-    "playlist",
-    "github-actions"
-  ],
+  "keywords": ["spotify", "playlist", "github-actions"],
   "author": "",
   "license": "MIT",
   "dependencies": {
@@ -37,8 +33,6 @@
     "typescript": "^5.1.6"
   },
   "pnpm": {
-    "onlyBuiltDependencies": [
-      "spotify-utility"
-    ]
+    "onlyBuiltDependencies": ["spotify-utility"]
   }
 }
