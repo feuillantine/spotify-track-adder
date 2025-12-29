@@ -74,8 +74,8 @@ jobs:
       - name: Comment and close issue
         if: always()
         run: |
-          has_urls="${env.HAS_URLS}"
-          run_status="${env.RUN_STATUS}"
+          has_urls="${steps.extract-urls.outputs.has_urls}"
+          run_status="${steps.run-script.outcome}"
 
           if [ "$has_urls" != "true" ]; then
             BODY=$(printf '@%s\nURLの抽出に失敗しました' "$ISSUE_USER")
@@ -90,5 +90,3 @@ jobs:
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          HAS_URLS: ${{ steps.extract-urls.outputs.has_urls }}
-          RUN_STATUS: ${{ steps.run-script.outcome }}
