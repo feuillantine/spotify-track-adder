@@ -74,13 +74,10 @@ jobs:
       - name: Comment and close issue
         if: always()
         run: |
-          has_urls="${steps.extract-urls.outputs.has_urls}"
-          run_status="${steps.run-script.outcome}"
-
-          if [ "$has_urls" != "true" ]; then
+          if [ "$HAS_URLS" != "true" ]; then
             BODY=$(printf '@%s\nURLの抽出に失敗しました' "$ISSUE_USER")
             gh issue comment "$ISSUE_NUMBER" --body "$BODY"
-          elif [ "$run_status" == "failure" ]; then
+          elif [ "$RUN_STATUS" == "failure" ]; then
             BODY=$(printf '@%s\n追加処理中にエラーが発生しました' "$ISSUE_USER")
             gh issue comment "$ISSUE_NUMBER" --body "$BODY"
           else
@@ -90,3 +87,5 @@ jobs:
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HAS_URLS: ${{ steps.extract-urls.outputs.has_urls }}
+          RUN_STATUS: ${{ steps.run-script.outcome }}
